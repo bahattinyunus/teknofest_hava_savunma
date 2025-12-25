@@ -59,5 +59,20 @@ class TestGokKalkanV2(unittest.TestCase):
         self.assertEqual(batarya.vurus_ihtimalini_hesapla(h_yakin), 0.99)
         self.assertEqual(batarya.vurus_ihtimalini_hesapla(h_orta), 0.50)
 
+    def test_ballistic_utils(self):
+        """TTI ve CPA matematiksel fonksiyonlarını doğrular."""
+        import utils
+        # Merkeze (0,0,0) dogru tam 1 km/s hizla gelen hedef
+        # Mesafe 10km, Hiz 1km/s -> TTI 10sn olmali
+        h = Hedef("B1", 10, 0, 0, -1, 0, 0)
+        self.assertEqual(utils.carpisma_suresi_hesapla(h), 10.0)
+        # CPA degeri 0 olmali (ustune geliyor)
+        self.assertEqual(utils.en_yakin_nokta_hesapla(h), 0.0)
+        
+        # Yanindan gecen hedef
+        # P = (10, 10, 0), V = (-1, 0, 0) -> CPA 10 olmali
+        h_side = Hedef("B2", 10, 10, 0, -1, 0, 0)
+        self.assertEqual(utils.en_yakin_nokta_hesapla(h_side), 10.0)
+
 if __name__ == '__main__':
     unittest.main()
