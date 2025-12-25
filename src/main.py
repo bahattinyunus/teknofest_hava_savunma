@@ -4,18 +4,19 @@ import yaml
 import os
 from typing import Dict, Any
 
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich.live import Live
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich import print as rprint
+
 from radar import RadarSistemi, Hedef
 from interceptor import OnleyiciBatarya, MuhimmatYokHatasi
 from telemetry import TelemetriSistemi
 import utils
 
-def efektli_yaz(metin: str, gecikme: float = 0.01):
-    """Metni daktilo efektiyle ekrana basar."""
-    for karakter in metin:
-        sys.stdout.write(karakter)
-        sys.stdout.flush()
-        time.sleep(gecikme)
-    print()
+console = Console()
 
 def ayarları_yukle(yol: str = "config/ayarlar.yaml") -> Dict[str, Any]:
     try:
@@ -23,6 +24,29 @@ def ayarları_yukle(yol: str = "config/ayarlar.yaml") -> Dict[str, Any]:
             return yaml.safe_load(f)
     except Exception:
         return {}
+
+def create_status_table(target_data: list, battery_ammo: int) -> Table:
+    table = Table(title="[bold blue]GÖKKALKAN YZ - CANLI TEMAS ÇİZELGESİ[/]", border_style="blue")
+    
+    table.add_column("ID", style="cyan", no_wrap=True)
+    table.add_column("Mesafe (km)", justify="right", style="magenta")
+    table.add_column("İrtifa (km)", justify="right", style="green")
+    table.add_column("Hız (km/h)", justify="right", style="yellow")
+    table.add_column("TTI (sn)", justify="right", style="red")
+    table.add_column("CPA (km)", justify="right", style="bold red")
+
+    for t in target_data:
+        table.add_row(
+            t['id'],
+            f"{t['mesafe']:.2f}",
+            f"{t['irtifa']:.2f}",
+            f"{t['hiz']:.1f}",
+            f"{t['tti']:.1f}" if t['tti'] else "---",
+            f"{t['cpa']:.2f}"
+        )
+    
+    table.caption = f"[bold white]Mühimmat Durumu: {battery_ammo}[/]"
+    return table
 
 def main():
     ayarlar = ayarları_yukle()
@@ -38,55 +62,74 @@ def main():
         hassasiyet_ayarlari=ayarlar.get('batarya', {}).get('vurus_hassasiyeti')
     )
 
-    os.system('cls' if os.name == 'nt' else 'clear')
-    efektli_yaz(">>> GÖKKALKAN YZ SİSTEMLERİ BAŞLATILIYOR...", 0.03)
-    time.sleep(0.5)
-    efektli_yaz(">>> RADAR KATMANI: AKTİF", 0.02)
-    efektli_yaz(">>> SİLAH KONTROL ARABİRİMİ: ÇEVRİMİÇİ", 0.02)
-    efektli_yaz(">>> YEREL GÜVENLİK PROTOKOLLERİ YÜKLENDİ.", 0.02)
-    time.sleep(0.5)
+    # Başlangıç Ekranı
+    console.clear()
+    console.print(Panel.fit(
+        "[bold cyan]GÖKKALKAN YZ v2.5.0 - HAVA SAVUNMA KOMUTA MERKEZİ[/]\n"
+        "[dim]Mimar: Bahattin Yunus Çetin | Sektör: Karadeniz/Trabzon[/]",
+        border_style="bold blue"
+    ))
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True,
+    ) as progress:
+        progress.add_task(description="Radar sistemleri senkronize ediliyor...", total=None)
+        time.sleep(1)
+        progress.add_task(description="Silah sistemleri kalibre ediliyor...", total=None)
+        time.sleep(1)
+        progress.add_task(description="Gök vatan veritabanı bağlandı.", total=None)
+        time.sleep(0.5)
+
+    telemetri.olay_kaydet("INFO", "Sistem tam kapasite ile başlatıldı.")
     
-    print("\n" + "█"*60)
-    print("      SKYSHIELD AI - BEYİN VE KOMUTA MERKEZİ V2.5")
-    print("      OPERATÖR: BAHATTİN YUNUS ÇETİN | LOKASYON: TRABZON")
-    print("█"*60 + "\n")
+    active_ui_targets = []
 
     try:
-        while True:
-            radar.guncelle()
-            yeni_temas = radar.tara()
-            
-            if yeni_temas:
-                tti = utils.carpisma_suresi_hesapla(yeni_temas)
-                cpa = utils.en_yakin_nokta_hesapla(yeni_temas)
-                total_hiz = yeni_temas.toplam_hiz
-
-                print(f"\n[!] TEMAS TESPİT EDİLDİ: {yeni_temas.id}")
-                print(f"    ├─ Mesafe: {yeni_temas.mesafe:.2f} km")
-                print(f"    ├─ İrtifa: {yeni_temas.z:.2f} km")
-                print(f"    ├─ Hız: {total_hiz:.1f} km/h")
-                if tti:
-                    print(f"    ├─ Çarpışma Süresi (TTI): {tti:.1f} sn")
-                print(f"    └─ En Yakın Geçiş (CPA): {cpa:.2f} km")
-
-                # Karar verme süreci
-                kritik_cpa = ayarlar.get('tehdit_limitleri', {}).get('kritik_mesafe', 50.0)
-                if cpa < kritik_cpa:
-                    efektli_yaz(f"    [!] KRİTİK TEHDİT ANALİZİ: {yeni_temas.id} angajman sahasında!", 0.01)
+        with Live(create_status_table([], batarya.muhimmat), refresh_per_second=1) as live:
+            while True:
+                radar.guncelle()
+                yeni_temas = radar.tara()
+                
+                # Mevcut hedefleri UI için hazırla
+                current_targets = []
+                for h in radar.aktif_hedefler:
+                    tti = utils.carpisma_suresi_hesapla(h)
+                    cpa = utils.en_yakin_nokta_hesapla(h)
+                    hiz = h.toplam_hiz
                     
-                    try:
-                        time.sleep(1) # Karar alma süresi
-                        if batarya.angaje_ol(yeni_temas):
-                            print(f"    [+] BAŞARILI: {yeni_temas.id} bölgeden temizlendi.")
-                        else:
-                            print(f"    [-] ISKALAMA: {yeni_temas.id} takibi devam ediyor.")
-                    except MuhimmatYokHatasi as e:
-                        print(f"    [X] KRİTİK HATA: {e}")
+                    data = {
+                        "id": h.id,
+                        "mesafe": h.mesafe,
+                        "irtifa": h.z,
+                        "hiz": hiz,
+                        "tti": tti,
+                        "cpa": cpa
+                    }
+                    current_targets.append(data)
 
-            time.sleep(2)
+                    # Otomatik Angajman Mantığı
+                    kritik_cpa = ayarlar.get('tehdit_limitleri', {}).get('kritik_mesafe', 50.0)
+                    if cpa < kritik_cpa and h.id not in [t.id for t in active_ui_targets]: # Sadece yeni kritikler için log at
+                        telemetri.olay_kaydet("WARNING", f"KRİTİK TEHDİT: {h.id}", data)
+                        
+                        # Angajman görsel efekti (Konsolun üstüne yazar)
+                        live.console.print(f"[bold red]>>> TEHDİT KİLİDİ: {h.id} <<<[/]")
+                        try:
+                            if batarya.angaje_ol(h):
+                                live.console.print(f"[bold green][+] İMHA BAŞARILI: {h.id}[/]")
+                                radar.aktif_hedefler.remove(h)
+                            else:
+                                live.console.print(f"[bold yellow][-] ISKALAMA: {h.id} takibi sürüyor![/]")
+                        except MuhimmatYokHatasi as e:
+                            live.console.print(f"[bold red][X] KRİTİK HATA: {e}[/]")
+
+                live.update(create_status_table(current_targets, batarya.muhimmat))
+                time.sleep(1)
 
     except KeyboardInterrupt:
-        print("\n\n>>> SISTEM KAPATILIYOR. Gök vatan size emanet.")
+        console.print("\n[bold red]SİSTEM KAPATILDI.[/] [white]Gök vatan size emanet.[/]")
         sys.exit(0)
 
 if __name__ == "__main__":

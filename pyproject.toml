@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gokkalkan-yz"
+version = "2.5.0"
+authors = [
+  { name="Bahattin Yunus Çetin", email="b.yunuscetin@gmail.com" },
+]
+description = "TEKNOFEST 2025 Hava Savunma Sistemi Referans Mimarisi"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy",
+    "PyYAML",
+    "rich",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/bahattinyunus/teknofest_hava_savunma"
+"Bug Tracker" = "https://github.com/bahattinyunus/teknofest_hava_savunma/issues"
+
+[project.scripts]
+gokkalkan = "src.main:main"
