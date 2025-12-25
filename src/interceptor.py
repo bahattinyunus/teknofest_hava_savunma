@@ -1,28 +1,48 @@
 import time
+from typing import Dict, Any
+from radar import Hedef
+
+class SavunmaHatasi(Exception):
+    """GökKalkan savunma sistemi için genel hata sınıfı."""
+    pass
+
+class MuhimmatYokHatasi(SavunmaHatasi):
+    """Mühimmat tükendiğinde fırlatılan hata."""
+    pass
 
 class OnleyiciBatarya:
-    def __init__(self, muhimmat=10):
+    def __init__(self, muhimmat: int = 10, hassasiyet_ayarlari: Dict[str, float] = None):
         self.muhimmat = muhimmat
-        print(f"[ONLEYICI] Batarya Çevrimiçi. Hazır Füzeler: {self.muhimmat}")
+        # Varsayılan hassasiyet ayarları
+        self.hassasiyet = hassasiyet_ayarlari or {
+            "yakin": 0.95,
+            "orta": 0.80,
+            "uzak": 0.50
+        }
 
-    def angaje_ol(self, hedef):
-        """Belirli bir hedefe angaje olur."""
+    def angaje_ol(self, hedef: Hedef) -> bool:
+        """Belirli bir hedefe angaje olur. Mühimmat yoksa hata fırlatır."""
         if self.muhimmat <= 0:
-            print("[ONLEYICI] UYARI: MÜHİMMAT TÜKENDİ!")
-            return False
+            raise MuhimmatYokHatasi("KRİTİK: Mühimmat kalmadı, angajman başarısız!")
         
-        print(f"[ONLEYICI] HEDEF {hedef['id']} ÜZERİNE KİLİTLENİLİYOR...")
-        time.sleep(1) # Simülasyon gecikmesi
-        print(f"[ONLEYICI] FÜZE ATEŞLENDİ! (Hedef Mesafesi: {hedef['mesafe']:.2f}km)")
+        # Mühimmat azalt
         self.muhimmat -= 1
-        return True
+        
+        # Angajman simülasyonu
+        # Mesafe ve hızın vuruş başarısına etkisi
+        vurus_skoru = self.vurus_ihtimalini_hesapla(hedef)
+        
+        # Basit bir başarı kontrolü (Gerçek projede daha karmaşık algoritmalar olur)
+        import random
+        return random.random() < vurus_skoru
 
-    def vurus_ihtimalini_hesapla(self, hedef):
-        """Mesafe ve hıza dayalı vuruş ihtimalini hesaplar."""
-        # Basit mantık: yakın daha iyi, ancak çok yakın kötü
-        if hedef['mesafe'] < 5:
-            return 0.95
-        elif hedef['mesafe'] < 50:
-            return 0.80
+    def vurus_ihtimalini_hesapla(self, hedef: Hedef) -> float:
+        """Mesafe ve irtifaya dayalı vuruş ihtimalini hesaplar."""
+        d = hedef.mesafe
+        
+        if d < 10:
+            return self.hassasiyet["yakin"]
+        elif d < 60:
+            return self.hassasiyet["orta"]
         else:
-            return 0.50
+            return self.hassasiyet["uzak"]
