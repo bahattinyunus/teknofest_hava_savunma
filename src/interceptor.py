@@ -1,28 +1,28 @@
 import time
 
-class InterceptorBattery:
-    def __init__(self, ammo=10):
-        self.ammo = ammo
-        print(f"[INTERCEPTOR] Battery Online. Missiles ready: {self.ammo}")
+class OnleyiciBatarya:
+    def __init__(self, muhimmat=10):
+        self.muhimmat = muhimmat
+        print(f"[ONLEYICI] Batarya Çevrimiçi. Hazır Füzeler: {self.muhimmat}")
 
-    def engage(self, target):
-        """Engages a specific target."""
-        if self.ammo <= 0:
-            print("[INTERCEPTOR] WARNING: DEPLETED AMMUNITION!")
+    def angaje_ol(self, hedef):
+        """Belirli bir hedefe angaje olur."""
+        if self.muhimmat <= 0:
+            print("[ONLEYICI] UYARI: MÜHİMMAT TÜKENDİ!")
             return False
         
-        print(f"[INTERCEPTOR] LOCKING ON TARGET {target['id']}...")
-        time.sleep(1) # Simulation delay
-        print(f"[INTERCEPTOR] FIRING MISSILE! (Target Dist: {target['distance']:.2f}km)")
-        self.ammo -= 1
+        print(f"[ONLEYICI] HEDEF {hedef['id']} ÜZERİNE KİLİTLENİLİYOR...")
+        time.sleep(1) # Simülasyon gecikmesi
+        print(f"[ONLEYICI] FÜZE ATEŞLENDİ! (Hedef Mesafesi: {hedef['mesafe']:.2f}km)")
+        self.muhimmat -= 1
         return True
 
-    def calculate_hit_probability(self, target):
-        """Calculates hit probability based on distance and speed."""
-        # Simple dummy logic: closer is better, but too close is bad
-        if target['distance'] < 5:
+    def vurus_ihtimalini_hesapla(self, hedef):
+        """Mesafe ve hıza dayalı vuruş ihtimalini hesaplar."""
+        # Basit mantık: yakın daha iyi, ancak çok yakın kötü
+        if hedef['mesafe'] < 5:
             return 0.95
-        elif target['distance'] < 50:
+        elif hedef['mesafe'] < 50:
             return 0.80
         else:
             return 0.50

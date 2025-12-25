@@ -1,20 +1,20 @@
-# Contributing to SkyShield AI
+# GökKalkan YZ'ye Katkıda Bulunma
 
-## Mission Brief
-Welcome to the SkyShield AI development unit. We are building the next generation of air defense systems. Accuracy and reliability are paramount.
+## Görev Özeti
+GökKalkan YZ geliştirme birimine hoş geldiniz. Yeni nesil hava savunma sistemlerini inşa ediyoruz. Doğruluk ve güvenilirlik her şeyden önemlidir.
 
-## Protocol
-1.  **Fork** the repository.
-2.  **Create** a feature branch (`git checkout -b feature/NewRadarAlgo`).
-3.  **Commit** your changes with clear, military-standard messages.
-4.  **Push** to the branch.
-5.  **Open** a Pull Request.
+## Protokol
+1.  **Fork** (Çatallama) işlemini yapın.
+2.  **Branş** oluşturun (`git checkout -b ozellik/YeniRadarAlgoritmasi`).
+3.  **Commit** mesajlarınız net ve askeri standartlara uygun olsun.
+4.  **Push** ile değişiklikleri gönderin.
+5.  **Pull Request** (Çekme İsteği) açın.
 
-## Code Standards
-- **Python**: Follow PEP 8.
-- **Documentation**: All critical functions must have docstrings explaining the algorithmic logic.
-- **Safety**: Ensure no infinite loops in detection logic.
+## Kod Standartları
+- **Python**: PEP 8 standartlarını takip edin.
+- **Dokümantasyon**: Kritik fonksiyonlar, algoritmik mantığı açıklayan dokümantasyon (docstring) içermelidir.
+- **Güvenlik**: Tespit mantığında sonsuz döngü olmadığından emin olun.
 
-## Contact
-**Commander**: Bahattin Yunus Çetin
-**Location**: Of, Trabzon
+## İletişim
+**Komutan**: Bahattin Yunus Çetin
+**Konum**: Of, Trabzon

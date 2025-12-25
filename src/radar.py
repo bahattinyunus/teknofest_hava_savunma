@@ -2,36 +2,36 @@ import random
 import time
 import math
 
-class RadarSystem:
-    def __init__(self, range_km=100.0):
-        self.range_km = range_km
-        self.active_targets = []
-        print(f"[RADAR] System Initialized. Range: {self.range_km}km")
+class RadarSistemi:
+    def __init__(self, menzil_km=100.0):
+        self.menzil_km = menzil_km
+        self.aktif_hedefler = []
+        print(f"[RADAR] Sistem Başlatıldı. Menzil: {self.menzil_km}km")
 
-    def scan(self):
-        """Simulates a radar scan sweep."""
-        print("[RADAR] Scanning airspace...")
-        # Simulate finding a target with 30% probability
+    def tara(self):
+        """Radar tarama döngüsünü simüle eder."""
+        print("[RADAR] Hava sahası taranıyor...")
+        # %30 ihtimalle hedef bulma simülasyonu
         if random.random() < 0.3:
-            target = {
-                "id": f"TGT-{random.randint(1000, 9999)}",
-                "azimuth": random.randint(0, 360),
-                "distance": random.uniform(10.0, self.range_km),
-                "speed": random.uniform(200.0, 2000.0), # km/h
-                "threat_level": random.choice(["LOW", "MEDIUM", "HIGH", "CRITICAL"])
+            hedef = {
+                "id": f"HDF-{random.randint(1000, 9999)}",
+                "azimut": random.randint(0, 360),
+                "mesafe": random.uniform(10.0, self.menzil_km),
+                "hiz": random.uniform(200.0, 2000.0), # km/s
+                "tehdit_seviyesi": random.choice(["DUSUK", "ORTA", "YUKSEK", "KRITIK"])
             }
-            self.active_targets.append(target)
-            return target
+            self.aktif_hedefler.append(hedef)
+            return hedef
         return None
 
-    def track_targets(self):
-        """Updates positions of tracked targets."""
-        for target in self.active_targets:
-            # Simulate target moving closer
-            approach_speed_kmps = target['speed'] / 3600.0
-            target['distance'] -= approach_speed_kmps
-            if target['distance'] < 0:
-                target['distance'] = 0
+    def hedefleri_takip_et(self):
+        """Takip edilen hedeflerin konumlarını günceller."""
+        for hedef in self.aktif_hedefler:
+            # Hedefin yaklaşmasını simüle et
+            yaklasma_hizi_kmps = hedef['hiz'] / 3600.0
+            hedef['mesafe'] -= yaklasma_hizi_kmps
+            if hedef['mesafe'] < 0:
+                hedef['mesafe'] = 0
         
-        # Remove targets that have been neutralized or landed (logic handled elsewhere usually)
-        return self.active_targets
+        # Etkisiz hale getirilen veya inen hedefleri temizle (mantık genellikle başka yerde işlenir)
+        return self.aktif_hedefler

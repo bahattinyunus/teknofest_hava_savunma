@@ -1,42 +1,42 @@
 import time
 import sys
-from radar import RadarSystem
-from interceptor import InterceptorBattery
+from radar import RadarSistemi
+from interceptor import OnleyiciBatarya
 
 def main():
     print("="*50)
-    print("SKYSHIELD AI - AIR DEFENSE COMMAND CENTER")
-    print("System Startup Sequence Initiated...")
+    print("GÖKKALKAN YZ - HAVA SAVUNMA KOMUTA MERKEZİ")
+    print("Sistem Başlatma Dizisi Devrede...")
     print("="*50)
     time.sleep(1)
 
-    radar = RadarSystem(range_km=150)
-    battery = InterceptorBattery(ammo=20)
+    radar = RadarSistemi(menzil_km=150)
+    batarya = OnleyiciBatarya(muhimmat=20)
 
-    print("\n[SYSTEM] Monitoring Hostile Activity. Press Ctrl+C to abort.\n")
+    print("\n[SİSTEM] Düşman Aktivitesi İzleniyor. İptal etmek için Ctrl+C'ye basın.\n")
 
     try:
         while True:
-            # 1. Scan Phase
-            target = radar.scan()
+            # 1. Tarama Fazı
+            hedef = radar.tara()
             
-            if target:
-                print(f"\n>>> ALERT: Contact Detected! ID: {target['id']} | Azimuth: {target['azimuth']} | Threat: {target['threat_level']}")
+            if hedef:
+                print(f"\n>>> ALARM: Temas Tespit Edildi! ID: {hedef['id']} | Azimut: {hedef['azimut']} | Tehdit: {hedef['tehdit_seviyesi']}")
                 
-                # 2. Assessment Phase
-                if target['threat_level'] in ["HIGH", "CRITICAL"]:
-                    print(f"[SYSTEM] ENGAGEMENT AUTHORITY GRANTED for {target['id']}")
-                    if battery.engage(target):
-                        hit_prob = battery.calculate_hit_probability(target)
-                        print(f"[INTERCEPTOR] Impact Probability: {hit_prob*100:.1f}%")
-                        print(f"[SYSTEM] TARGET {target['id']} NEUTRALIZED.")
+                # 2. Değerlendirme Fazı
+                if hedef['tehdit_seviyesi'] in ["YUKSEK", "KRITIK"]:
+                    print(f"[SİSTEM] {hedef['id']} için ANGAJMAN YETKİSİ VERİLDİ")
+                    if batarya.angaje_ol(hedef):
+                        vurus_ihtimali = batarya.vurus_ihtimalini_hesapla(hedef)
+                        print(f"[ONLEYICI] Vuruş İhtimali: %{vurus_ihtimali*100:.1f}")
+                        print(f"[SİSTEM] HEDEF {hedef['id']} ETKİSİZ HALE GETİRİLDİ.")
                 else:
-                    print(f"[SYSTEM] Monitoring target {target['id']} (Non-Lethal).")
+                    print(f"[SİSTEM] Hedef {hedef['id']} izleniyor (Ölümcül Olmayan).")
             
-            time.sleep(2) # Scan interval
+            time.sleep(2) # Tarama aralığı
 
     except KeyboardInterrupt:
-        print("\n[SYSTEM] Shutting down defense grid...")
+        print("\n[SİSTEM] Savunma ağı kapatılıyor...")
         sys.exit(0)
 
 if __name__ == "__main__":
