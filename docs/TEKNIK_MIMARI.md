@@ -1,44 +1,60 @@
-# 📐 GökKalkan YZ - Teknik Mimari Dokümanı
+# 📐 GökKalkan AI - İleri Teknik Mimari ve Balistik Doktrini
 
-## 1. Sisteme Genel Bakış
+## 1. Giriş
+Bu doküman, GökKalkan AI sisteminin altında yatan matematiksel ve fiziksel temelleri detaylandırmak için hazırlanmıştır. Sistem, kinetik ve elektromanyetik verileri işleyerek otonom karar mekanizmalarını tetikler.
 
-GökKalkan YZ, katmanlı bir hava savunma simülasyonudur. Sistem, tehditleri tespit etmekten (Sense), analiz etmeye (Decide) ve engellemeye (Act) kadar olan OODA (Observe-Orient-Decide-Act) döngüsünü otonom olarak gerçekleştirir.
+## 2. Balistik Tahmin Algoritmaları
 
-## 2. Algoritmik Mantık
+### 2.1. Time To Impact (TTI) Hesaplaması
+Hedefin merkeze (0,0,0) ulaşma süresi, hedefin pozisyon vektörü $\vec{P}$ ve hız vektörü $\vec{V}$ kullanılarak hesaplanır.
 
-### 2.1. Algılama Modülü (Radar)
-Rastgele olasılık dağılımı kullanılarak radar kesit alanı (RCS) simülasyonu yapılır.
-- **Menzil Denklemi:** $R_{max} = \sqrt[4]{\frac{P_t G^2 \lambda^2 \sigma}{(4\pi)^3 P_{min}}}$
-  *(Not: Simülasyonda bu denklem basitleştirilmiş lineer mesafe kontrolü olarak uygulanmıştır.)*
-- **Taramalar:** Sistem saniyede 0.5Hz frekans ile tarama yapar.
+Denklem:
+$$TTI = - \frac{\vec{P} \cdot \vec{V}}{|\vec{V}|^2}$$
 
-### 2.2. Tehdit Değerlendirme
-Algılanan her cisim bir "Tehdit Matriksi"ne tabi tutulur:
-- **KRITIK:** Mesafe < 50km VE Hız > 1000km/s (Balistik Füze Profili)
-- **YUKSEK:** Mesafe < 80km (Taarruz Uçağı Profili)
-- **ORTA/DUSUK:** Sivil uçak veya iha profili.
+Burada:
+- $\vec{P} = (x, y, z)$
+- $\vec{V} = (v_x, v_y, v_z)$
+- $\vec{P} \cdot \vec{V} < 0$ ise hedef bataryaya yaklaşıyor demektir.
 
-### 2.3. Engelleme (Interceptor)
-Füze vuruş ihtimali ($P_k$), hedefin o anki konumu ve kaçınma manevrası kapasitesine ters orantılı olarak hesaplanır.
+### 2.2. Closest Point of Approach (CPA)
+Hedefin bataryaya en çok yaklaşacağı (teğet geçeceği) mesafedir. Hedefin doğrusal hareket ettiği varsayılır.
 
-$$P_k = \begin{cases} 
-0.95 & \text{if } d < 5km \\
-0.80 & \text{if } 5km \le d < 50km \\
-0.50 & \text{otherwise}
-\end{cases}$$
+$$d_{CPA} = \frac{|\vec{P} \times \vec{V}|}{|\vec{V}|}$$
 
-## 3. Yazılım Mimarisi
+---
+
+## 3. Sistem Akış Diyagramı
 
 ```mermaid
-graph TD
-    A[Ana Döngü (Main)] -->|Veri İsteği| B(Radar Sistemi)
-    B -->|Hedef Listesi| A
-    A -->|Tehdit Analizi| C{Tehdit Seviyesi?}
-    C -->|Kritik/Yüksek| D[Engelleme Bataryası]
-    D -->|Ateşleme| E[Hedef İmha]
-    C -->|Düşük| F[Loglama]
+sequenceDiagram
+    participant R as 📡 Radar Grid
+    participant C as 🧠 GökKalkan Core
+    participant B as 🚀 Interceptor Battery
+    participant T as 📝 Telemetry Log
+    
+    Note over R: 360° Airspace Sweep
+    R->>C: Object Position (x,y,z,v)
+    C->>C: Calculate TTI & CPA
+    alt Tehdit Kritik (CPA < Limit)
+        C->>B: AUTHORIZED: Scramble Engagement
+        B->>B: Calculate Fire Geometry
+        B->>C: Success / Failure Report
+        C->>T: Record Engagement Data
+    else İzleme Modu
+        C->>T: Log Position Update
+    end
 ```
 
-## 4. Gelecek Geliştirmeler
-- **Sensor Fusion:** Optik ve Termal kamera verilerinin entegrasyonu.
-- **Swarm Defense:** Sürü drone saldırılarına karşı karşı-sürü algoritmaları.
+---
+
+## 4. Yazılım Tasarım Kalıpları
+Sistemde kullanılan bazı profesyonel kalıplar:
+1.  **Singleton Pattern:** Radar ve Telemetri sistemleri tekil bir örnek üzerinden yönetilir.
+2.  **Observer Pattern:** Radar her temas bulduğunda ana kontrol panelini uyarır.
+3.  **Strategy Pattern:** Farklı tehdit tipleri (İHA vs Balistik Füze) için farklı engelleme stratejileri uygulanabilir.
+
+## 5. Donanım Gereksinim Projeksiyonu
+GökKalkan AI, gerçek dünya senaryolarında aşağıdaki donanım mimarisiyle entegre çalışacak şekilde tasarlanmıştır:
+- **FPGA:** Gerçek zamanlı sinyal işleme (DSP).
+- **GPU:** Yapay zeka tabanlı görüntü tanıma ve tehdit sınıflandırma.
+- **Embedded Python:** Yüksek seviye mantık ve strateji katmanı.
